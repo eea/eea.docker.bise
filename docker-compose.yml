@@ -8,8 +8,8 @@ services:
     - varnish
     environment:
       SERVER_ADMIN: "helpdesk@biodiversity.europa.eu"
-      SERVER_NAME: "biodiversity-test.europa.eu"
-      RewriteRule: "^/(.*) http://varnish/VirtualHostBase/http/biodiversity-test.europa.eu:80/Plone/VirtualHostRoot/$$1 [P,L]"
+      SERVER_NAME: "demo-biodiversity.eea.europa.eu"
+      RewriteRule: "^/(.*) http://varnish/VirtualHostBase/http/demo-biodiversity.eea.europa.eu:80/Plone/VirtualHostRoot/$$1 [P,L]"
       TZ: "Europe/Copenhagen"
   varnish:
     image: eeacms/varnish-emrt-necd:1.5
