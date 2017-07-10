@@ -1,0 +1,102 @@
+version: "2"
+services:
+  apache:
+    image: eeacms/apache:2.4-1.0
+    labels:
+      io.rancher.scheduler.affinity:host_label_ne: reserved=yes
+    depends_on:
+    - varnish
+    environment:
+      SERVER_ADMIN: "helpdesk@biodiversity.europa.eu"
+      SERVER_NAME: "biodiversity-test.europa.eu"
+      RewriteRule: "^/(.*) http://varnish/VirtualHostBase/http/biodiversity-test.europa.eu:80/Plone/VirtualHostRoot/$$1 [P,L]"
+      TZ: "Europe/Copenhagen"
+  varnish:
+    image: eeacms/varnish-emrt-necd:1.5
+    labels:
+      io.rancher.scheduler.affinity:host_label_ne: reserved=yes
+    depends_on:
+    - haproxy
+    environment:
+      VARNISH_BACKEND_HOST: "haproxy"
+      VARNISH_BACKEND_PORT: "5000"
+      VARNISH_MEMORY: "2G"
+      TZ: "Europe/Copenhagen"
+  haproxy:
+    image: eeacms/haproxy:1.7-1.0
+    labels:
+      io.rancher.scheduler.affinity:host_label_ne: reserved=yes
+    depends_on:
+    - plone
+    environment:
+      BACKENDS: "plone"
+      BACKENDS_PORT: "8080"
+      DNS_ENABLED: "True"
+      TZ: "Europe/Copenhagen"
+  plone:
+    image: eeacms/eea.docker.plone.bise:latest
+    labels:
+      io.rancher.scheduler.affinity:host_label_ne: reserved=yes
+    depends_on:
+    - zeoserver
+    - memcached
+    environment:
+      ZOPE_MODE: "zeo_client"
+      TZ: "Europe/Copenhagen"
+    volumes:
+    - bise-downloads:/data/downloads
+    - bise-plone-data:/data
+  async:
+    image: eeacms/eea.docker.plone.bise:latest
+    labels:
+      io.rancher.scheduler.affinity:host_label_ne: reserved=yes
+    depends_on:
+    - zeoserver
+    - memcached
+    environment:
+     ZOPE_MODE: "zeo_async"
+     TZ: "Europe/Copenhagen"
+    volumes:
+    - bise-downloads:/data/downloads
+    - bise-async-data:/data
+  memcached:
+    image: memcached:1.4.35
+    labels:
+      io.rancher.scheduler.affinity:host_label_ne: reserved=yes
+    environment:
+      TZ: "Europe/Copenhagen"
+    command:
+    - "-m"
+    - "2048"
+  zeoserver:
+    image: plone:4.3.10
+    labels:
+      io.rancher.scheduler.affinity:host_label: hostname=
+    environment:
+      TZ: "Europe/Copenhagen"
+    command:
+    - zeoserver
+    volumes:
+    - bise-data:/data
+  rsync-server:
+    image: eeacms/rsync
+    labels:
+      io.rancher.scheduler.affinity:host_label: hostname=
+    command:
+    - server
+    ports:
+    - "22"
+    volumes:
+    - bise-data:/data
+    environment:
+      SSH_AUTH_KEY_1:
+
+volumes:
+  bise-plone-data:
+    per_container: true
+  bise-async-data:
+    per_container: true
+  bise-data:
+    driver: rancher-nfs
+  bise-downloads:
+driver: rancher-nfs

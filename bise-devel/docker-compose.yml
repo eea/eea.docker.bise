@@ -1,0 +1,9 @@
+debug:
+  image: eeacms/eea.docker.plone.bise:latest
+  ports:
+    - "8090:8080"
+  volumes:
+    - ./src:/plone/instance/src
+    - bise-downloads:/data/downloads
+    - bise-plone-data:/data
+  entrypoint: sh -c "tail -f /dev/null"

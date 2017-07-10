@@ -1,0 +1,18 @@
+source_code:
+  image: eeacms/eea.docker.plone.bise:devel
+  entrypoint: ['buildout']
+  command: ['-c', 'source.cfg']
+  volumes:
+  - ./src/source.cfg:/plone/instance/source.cfg:ro
+  - ./src:/plone/instance/src:z
+
+# You can start a new console with
+# docker exec -it devel_console_1 sh
+# You can now run any manual command with that shell
+console:
+  image: eeacms/eea.docker.plone.bise:devel
+  entrypoint: ['bash']
+  command: ['-c', "tail -f /dev/null"]
+  volumes:
+  - ./src/source.cfg:/plone/instance/source.cfg:ro
+  - ./src:/plone/instance/src:z
